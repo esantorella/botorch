@@ -7,23 +7,10 @@
 r"""
 References
 
-.. [burt2020svgp]
-    David R. Burt and Carl Edward Rasmussen and Mark van der Wilk,
-    Convergence of Sparse Variational Inference in Gaussian Process Regression,
-    Journal of Machine Learning Research, 2020,
-    http://jmlr.org/papers/v21/19-1015.html.
-
 .. [hensman2013svgp]
     James Hensman and Nicolo Fusi and Neil D. Lawrence, Gaussian Processes
     for Big Data, Proceedings of the 29th Conference on Uncertainty in
     Artificial Intelligence, 2013, https://arxiv.org/abs/1309.6835.
-
-.. [moss2023ipa]
-    Henry B. Moss and Sebastian W. Ober and Victor Picheny,
-    Inducing Point Allocation for Sparse Gaussian Processes
-    in High-Throughput Bayesian Optimization,Proceedings of
-    the 25th International Conference on Artificial Intelligence
-    and Statistics, 2023, https://arxiv.org/pdf/2301.10123.pdf.
 
 """
 
