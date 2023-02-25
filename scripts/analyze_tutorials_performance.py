@@ -22,15 +22,15 @@ import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 
 
-def run_tutorial(fname: str) -> None:
-    with open(fname, "r") as infile:
+def run_tutorial(dirname: str, fname: str) -> None:
+    with open(os.path.join(dirname, fname), "r") as infile:
         nb_str = infile.read()
     nb = nbformat.reads(nb_str, nbformat.NO_CONVERT)
     timeout = int(60 * 60 * 2.5)
     ep = ExecutePreprocessor(timeout=timeout)
 
     # execute notebook, using `tutorial_dir` as working directory
-    ep.preprocess(nb)
+    ep.preprocess(nb, {"metadata": {"path": dirname}})
 
 
 def read_data_one_file(data_dir: str, fname: str) -> pd.DataFrame:
@@ -38,16 +38,14 @@ def read_data_one_file(data_dir: str, fname: str) -> pd.DataFrame:
     The file name format is {mode}_{commit_hash}_{date_time}.csv
     """
     mode, commit_hash, date_time = fname[:-4].split("_")
-    df = (
-        pd.read_csv(os.path.join(data_dir, fname))
-        .dropna()
-        .assign(
-            mode=mode, commit_hash=commit_hash, datetime=pd.to_datetime(date_time),
-            fname=fname
-        )
+    df = pd.read_csv(os.path.join(data_dir, fname)).assign(
+        mode=mode,
+        commit_hash=commit_hash,
+        datetime=pd.to_datetime(date_time),
+        fname=fname,
     )
     # clean out '.ipynb' if it is present
-    df["name"] = df["name"].apply(lambda x: x[:-len('.ipynb')])
+    df["name"] = df["name"].apply(lambda x: x[: -len(".ipynb")])
     return df
 
 
@@ -59,14 +57,15 @@ def concatenate_data(data_dir: str) -> None:
             for fname in os.listdir(data_dir)
             if fname != "all_data.csv"
         ),
-        ignore_index=True
+        ignore_index=True,
     ).sort_values(["mode", "datetime"], ignore_index=True)
-    df.to_csv(os.path.join(data_dir, "all_data.csv"))
+    df.to_csv(os.path.join(data_dir, "all_data.csv"), index=False)
 
 
 if __name__ == "__main__":
     repo_root = os.getcwd()
     data_dir = os.path.join(repo_root, "tutorial_performance_data")
-    print(f"data_dir: {data_dir}")
     concatenate_data(data_dir)
-    run_tutorial(os.path.join(repo_root, "notebooks", "tutorials_performance_tracking.ipynb"))
+    run_tutorial(
+        os.path.join(repo_root, "notebooks"), "tutorials_performance_tracking.ipynb"
+    )
