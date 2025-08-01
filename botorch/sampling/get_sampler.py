@@ -11,7 +11,6 @@ from botorch.posteriors.ensemble import EnsemblePosterior
 from botorch.posteriors.gpytorch import GPyTorchPosterior
 from botorch.posteriors.posterior import Posterior
 from botorch.posteriors.posterior_list import PosteriorList
-from botorch.posteriors.torch import TorchPosterior
 from botorch.posteriors.transformed import TransformedPosterior
 from botorch.sampling.base import MCSampler
 from botorch.sampling.index_sampler import IndexSampler
@@ -21,28 +20,15 @@ from botorch.sampling.normal import (
     NormalMCSampler,
     SobolQMCNormalSampler,
 )
-from botorch.utils.dispatcher import Dispatcher
-from gpytorch.distributions import MultivariateNormal
-from torch.distributions import Distribution
+from multipledispatch.dispatcher import Dispatcher
 from torch.quasirandom import SobolEngine
 
 
-def _posterior_to_distribution_encoder(
-    posterior: Posterior,
-) -> type[Distribution] | type[Posterior]:
-    r"""An encoder returning the type of the distribution for `TorchPosterior`
-    and the type of the posterior for the rest.
-    """
-    if isinstance(posterior, TorchPosterior):
-        return type(posterior.distribution)
-    return type(posterior)
-
-
-GetSampler = Dispatcher("get_sampler", encoder=_posterior_to_distribution_encoder)
+GetSampler = Dispatcher("get_sampler")
 
 
 def get_sampler(
-    posterior: TorchPosterior,
+    posterior: Posterior,
     sample_shape: torch.Size,
     *,
     seed: int | None = None,
@@ -65,7 +51,7 @@ def get_sampler(
     return GetSampler(posterior, sample_shape=sample_shape, seed=seed)
 
 
-@GetSampler.register(MultivariateNormal)
+@GetSampler.register(GPyTorchPosterior)
 def _get_sampler_mvn(
     posterior: GPyTorchPosterior,
     sample_shape: torch.Size,
